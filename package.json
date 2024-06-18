@@ -8,6 +8,10 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevinlupera/eagle-feature"
+  },
   "scripts": {
     "build": "tsup",
     "test": "jest"
