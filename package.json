@@ -1,6 +1,6 @@
 {
   "name": "eagle-feature",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "eagle feature flags",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -15,9 +15,6 @@
   "scripts": {
     "build": "tsup",
     "test": "jest"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [
     "feature",

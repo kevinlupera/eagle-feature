@@ -12,6 +12,10 @@ class FeatureToggles {
     this._toggles = toggles;
   }
 
+  get(): Toggles {
+    return this._toggles;
+  }
+
   isFeatureEnabled(
     featureName: string,
     request?: any,

@@ -1,72 +1,163 @@
-# EagleFeature
+# Eagle Feature Toggle
 
-EagleFeature es una biblioteca para gestionar las funcionalidades de tu aplicación.
+A lightweight and flexible feature toggle system for Node.js applications.
 
 ## Installation
 
-To install EagleFeature, run the following command in your terminal:
-
 ```bash
 npm install eagle-feature
+# or
+yarn add eagle-feature
 ```
 
-## Usage
-
-First, import EagleFeature into your file:
+## Quick Start
 
 ```typescript
-import FeatureToggles, { ToggleFunction } from "eagle-feature";
-```
+import { initializeFeatureToggles, isFeatureEnabled } from 'eagle-feature';
 
-Then, create a new instance of EagleFeature and load your feature toggles:
+// Initialize at application startup
+await initializeFeatureToggles({
+  environment: process.env.NODE_ENV
+});
 
-```typescript
-const featureToggles = new FeatureToggles();
-
-const toggles = {
-  feature1: true,
-  feature2: false,
-  feature3: ((req: any, res: any) => true) as ToggleFunction,
-  feature4: ((req: any, res: any) => false) as ToggleFunction,
-};
-
-featureToggles.load(toggles);
-```
-
-Now you can check if a feature is enabled using isFeatureEnabled:
-
-```typescript
-if (featureToggles.isFeatureEnabled("feature1")) {
-  console.log("Feature 1 is enabled");
-} else {
-  console.log("Feature 1 is disabled");
+// Use in your application
+if (isFeatureEnabled('newFeature')) {
+  // Feature is enabled
 }
 ```
 
-You can also use middleware to add an isFeatureEnabled function to response.locals in an Express middleware:
+## Configuration
+
+Create environment-specific feature toggle configurations in your project:
 
 ```typescript
-app.use(featureToggles.middleware);
+// src/features/environments/development.ts
+import { Toggles } from 'eagle-feature';
+
+const developmentToggles: Toggles = {
+  newFeature: true,
+  betaFeature: false,
+  userSpecificFeature: (request) => {
+    return request.user?.role === 'admin';
+  }
+};
+
+export default developmentToggles;
 ```
 
-Now you can use isFeatureEnabled in your views:
+Then initialize the feature toggles with your configuration path:
 
 ```typescript
-if isFeatureEnabled('feature1')
-  // p La característica 1 está habilitada
+await initializeFeatureToggles({
+  environment: process.env.NODE_ENV,
+  configPath: './src/features/environments/development'
+});
 ```
 
-## Tests
+## API Reference
 
-To run the tests, use the following command:
+### `initializeFeatureToggles(options: FeatureToggleOptions): Promise<void>`
 
-```bash
-npm test
+Initializes the feature toggle system with environment-specific configurations.
+
+```typescript
+interface FeatureToggleOptions {
+  environment: string;
+  configPath?: string; // Optional custom path to your configuration
+}
+
+// Basic usage
+await initializeFeatureToggles({
+  environment: 'development'
+});
+
+// With custom configuration path
+await initializeFeatureToggles({
+  environment: 'development',
+  configPath: './src/features/environments/development'
+});
 ```
 
-## Contribute
+### `isFeatureEnabled(featureName: string, context?: any): boolean`
 
-Contributions are welcome. Please, open an issue or a pull request.
+Checks if a feature is enabled.
+
+```typescript
+// Simple boolean toggle
+isFeatureEnabled('newFeature');
+
+// Context-aware toggle
+isFeatureEnabled('userSpecificFeature', { user: { role: 'admin' } });
+```
+
+### `getFeatureToggles(): FeatureToggles`
+
+Returns the feature toggles instance.
+
+```typescript
+const toggles = getFeatureToggles();
+```
+
+## Feature Toggle Types
+
+### Boolean Toggles
+```typescript
+{
+  simpleFeature: true,
+  disabledFeature: false
+}
+```
+
+### Function Toggles
+```typescript
+{
+  userSpecificFeature: (request) => {
+    return request.user?.role === 'admin';
+  },
+  timeBasedFeature: (request) => {
+    return new Date().getHours() > 12;
+  }
+}
+```
+
+## Error Handling
+
+The system will throw errors in the following cases:
+- When trying to use feature toggles before initialization
+- When there's an error loading the environment configuration
+- When a feature toggle function throws an error (returns false by default)
+
+## Best Practices
+
+1. Initialize feature toggles at application startup
+2. Keep your feature toggle configurations in your project's source code
+3. Use environment-specific configurations
+4. Keep feature toggle names descriptive and consistent
+5. Use TypeScript for better type safety
+6. Handle errors appropriately in your application
+
+## Example Usage with Express
+
+```typescript
+import express from 'express';
+import { initializeFeatureToggles, isFeatureEnabled } from 'eagle-feature';
+
+const app = express();
+
+// Initialize feature toggles
+await initializeFeatureToggles({
+  environment: process.env.NODE_ENV,
+  configPath: './src/features/environments/development'
+});
+
+app.get('/api/feature', (req, res) => {
+  if (isFeatureEnabled('newFeature', req)) {
+    res.json({ message: 'New feature is enabled' });
+  } else {
+    res.json({ message: 'Feature is disabled' });
+  }
+});
+```
 
 ## License
 
