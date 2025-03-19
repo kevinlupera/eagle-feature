@@ -40,4 +40,12 @@ class FeatureToggles {
   }
 }
 
-export default FeatureToggles;
+export { FeatureToggles as default };
+
+// Export types and functions from loader
+export { 
+  FeatureToggleOptions,
+  initializeFeatureToggles,
+  isFeatureEnabled,
+  getFeatureToggles
+} from './loader';
